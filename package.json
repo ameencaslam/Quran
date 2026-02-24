@@ -1,0 +1,27 @@
+{
+  "name": "quran-juz-video",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build:juz": "node src/build-juz-timeline.mjs",
+    "build:all": "node src/build-all-timelines.mjs",
+    "render:juz": "tsx remotion/render-juz.mts",
+    "render:ayah": "tsx remotion/render-ayah.mts",
+    "debug:ayah": "node src/build-ayah.mjs"
+  },
+  "dependencies": {
+    "get-audio-duration": "^4.0.0",
+    "node-fetch": "^3.3.2",
+    "remotion": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "@remotion/bundler": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsx": "^4.19.0"
+  }
+}
