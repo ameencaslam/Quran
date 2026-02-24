@@ -2,6 +2,7 @@ import React from 'react';
 import {
   AbsoluteFill,
   Audio,
+  Img,
   Sequence,
   staticFile,
   useCurrentFrame,
@@ -38,7 +39,7 @@ export const AyahJuz: React.FC<Props> = ({ segments, backgroundRelPath }) => {
     <AbsoluteFill style={{ backgroundColor: 'black', color: 'white' }}>
       {backgroundRelPath ? (
         <AbsoluteFill>
-          <img
+          <Img
             src={staticFile(backgroundRelPath)}
             style={{
               width: '100%',
