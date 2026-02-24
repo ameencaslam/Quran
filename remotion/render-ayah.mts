@@ -69,8 +69,18 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     `Rendering ayah ${verseKey} of Juz ${juzNumber} to ${outPath}...`,
   );
 
+  const startTime = Date.now();
   let lastPct = -1;
   let lastTime = Date.now();
+  let lastStage: string | null = null;
+  type ProgressSnapshot = {
+    renderedDoneIn: number | null;
+    encodedDoneIn: number | null;
+    stitchStage: string;
+    renderedFrames: number;
+    encodedFrames: number;
+  };
+  let lastProgress: ProgressSnapshot | null = null;
 
   await renderMedia({
     composition: ayahComp,
@@ -84,13 +94,17 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     crf: 15,
     imageFormat: "jpeg",
     jpegQuality: 95,
-    onProgress: ({ progress }) => {
-      const pct = Math.round(progress * 100);
+    onProgress: (p) => {
+      lastProgress = p as ProgressSnapshot;
+      if (p.stitchStage !== lastStage) {
+        console.log(`[Phase] ${p.stitchStage}`);
+        lastStage = p.stitchStage;
+      }
+      const pct = Math.round(p.progress * 100);
       if (pct !== lastPct) {
         const now = Date.now();
         if (lastPct >= 0) {
-          const deltaMs = now - lastTime;
-          const deltaSec = (deltaMs / 1000).toFixed(1);
+          const deltaSec = ((now - lastTime) / 1000).toFixed(1);
           console.log(`Progress: ${pct}% (+${deltaSec}s since ${lastPct}%)`);
         } else {
           console.log(`Progress: ${pct}%`);
@@ -101,7 +115,20 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     },
   });
 
+  const totalMs = Date.now() - startTime;
   console.log(`Rendered ${outPath}`);
+  console.log("--- Timing ---");
+  console.log(`Total: ${(totalMs / 1000).toFixed(1)}s`);
+  const snap = lastProgress as ProgressSnapshot | null;
+  if (snap) {
+    const r = snap.renderedDoneIn;
+    const e = snap.encodedDoneIn;
+    if (r != null)
+      console.log(
+        `Rendering (${snap.renderedFrames} frames): ${(r / 1000).toFixed(1)}s`,
+      );
+    if (e != null) console.log(`Encoding: ${(e / 1000).toFixed(1)}s`);
+  }
 }
 
 (async () => {
