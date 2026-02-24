@@ -7,7 +7,6 @@
     "build:all": "node src/build-all-timelines.mjs",
     "render:juz": "tsx remotion/render-juz.mts",
     "render:ayah": "tsx remotion/render-ayah.mts",
-    "render:juz:from-ayahs": "tsx remotion/render-juz-from-ayahs.mts",
     "debug:ayah": "node src/build-ayah.mjs"
   },
   "dependencies": {
