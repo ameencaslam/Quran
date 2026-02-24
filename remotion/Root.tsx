@@ -19,6 +19,7 @@ export const RemotionRoot: React.FC = () => (
       height={HEIGHT}
       defaultProps={{
         segments: juz1.segments,
+        backgroundRelPath: '/backgrounds/1.png',
       }}
     />
   </>

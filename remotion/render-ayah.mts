@@ -40,8 +40,11 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     webpackOverride: (config) => config,
   });
 
+  const bgIndex = ((juzNumber - 1) % 5) + 1;
+  const backgroundRelPath = `/backgrounds/${bgIndex}.png`;
+
   const comps = await getCompositions(bundleLocation, {
-    inputProps: {segments: segmentsToRender},
+    inputProps: {segments: segmentsToRender, backgroundRelPath},
   });
   const comp = comps.find((c) => c.id === 'JuzVideo');
   if (!comp) {
@@ -69,7 +72,11 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     outputLocation: outPath,
     inputProps: {
       segments: segmentsToRender,
+      backgroundRelPath,
     },
+    crf: 15,
+    imageFormat: 'png',
+    jpegQuality: 95,
     onProgress: ({progress}) => {
       const pct = Math.round(progress * 100);
       if (pct !== lastPct) {

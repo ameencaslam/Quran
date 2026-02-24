@@ -27,15 +27,28 @@ type AyahSegment = {
 
 type Props = {
   segments: AyahSegment[];
-  backgroundVideoPath?: string;
+  backgroundRelPath?: string;
 };
 
-export const AyahJuz: React.FC<Props> = ({ segments }) => {
+export const AyahJuz: React.FC<Props> = ({ segments, backgroundRelPath }) => {
   const { fps } = useVideoConfig();
   const ENABLE_AUDIO = true; // audio enabled
 
   return (
     <AbsoluteFill style={{ backgroundColor: 'black', color: 'white' }}>
+      {backgroundRelPath ? (
+        <AbsoluteFill>
+          <img
+            src={staticFile(backgroundRelPath)}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+            alt=""
+          />
+        </AbsoluteFill>
+      ) : null}
       {ENABLE_AUDIO &&
         segments.map((s) => (
           <Sequence
@@ -89,7 +102,7 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({ segments })
         fontFamily: 'sans-serif',
       }}
     >
-      <div style={{ fontSize: 55, marginBottom: 60, direction: 'rtl' }}>
+      <div style={{ fontSize: 55, marginBottom: 80, direction: 'rtl' }}>
         {seg.arabic.uthmani} {endOfAyahMarker}
       </div>
       <div
