@@ -7,7 +7,7 @@
     "build:all": "node src/build-all-timelines.mjs",
     "render:juz": "tsx remotion/render-juz.mts",
     "render:ayah": "tsx remotion/render-ayah.mts",
-    "render:ayah-batch": "node scripts/render-ayah-batch.mjs",
+    "render:ayah-batch": "tsx remotion/render-ayah-batch.mts",
     "concat:juz": "node scripts/concat-juz.mjs",
     "debug:ayah": "node src/build-ayah.mjs"
   },
