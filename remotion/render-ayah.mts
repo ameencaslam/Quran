@@ -1,6 +1,5 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import os from "node:os";
 import fs from "node:fs/promises";
 import { bundle } from "@remotion/bundler";
 import { getCompositions, renderMedia } from "@remotion/renderer";
@@ -67,12 +66,8 @@ async function renderAyah(juzNumber: number, verseKey: string) {
   const safeKey = verseKey.replace(":", "_");
   const outPath = path.join(outDir, `ayah_${safeKey}.mp4`);
 
-  const concurrency =
-    process.env.REMOTION_CONCURRENCY != null
-      ? Number(process.env.REMOTION_CONCURRENCY)
-      : os.cpus().length;
   console.log(
-    `Rendering ayah ${verseKey} of Juz ${juzNumber} to ${outPath}... (concurrency: ${concurrency})`,
+    `Rendering ayah ${verseKey} of Juz ${juzNumber} to ${outPath}...`,
   );
 
   const startTime = Date.now();
@@ -98,7 +93,6 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     crf: 15,
     imageFormat: "jpeg",
     jpegQuality: 95,
-    concurrency,
     onProgress: (p) => {
       lastProgress = p as ProgressSnapshot;
       if (p.stitchStage !== lastStage) {
