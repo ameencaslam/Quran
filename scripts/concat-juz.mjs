@@ -5,7 +5,9 @@ import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import os from "node:os";
 import { getAudioDurationInSeconds } from "get-audio-duration";
-import { WIDTH, HEIGHT } from "../src/config.mjs";
+import { WIDTH, HEIGHT, FPS } from "../src/config.mjs";
+
+const AUDIO_RATE = 48000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,9 +15,24 @@ const __dirname = path.dirname(__filename);
 const GAP_DURATION_SEC = 4;
 const BISMI_PATH = path.join(__dirname, "..", "resources", "bismi.mp3");
 
-function runFfmpeg(args) {
+function runFfmpeg(args, opts = {}) {
+  const { onProgress } = opts;
   return new Promise((resolve, reject) => {
-    const proc = spawn("ffmpeg", args, { stdio: "inherit" });
+    const proc = spawn("ffmpeg", args, {
+      stdio: ["ignore", onProgress ? "ignore" : "inherit", onProgress ? "pipe" : "inherit"],
+    });
+    if (onProgress && proc.stderr) {
+      let buf = "";
+      proc.stderr.on("data", (chunk) => {
+        buf += chunk.toString();
+        const lines = buf.split("\n");
+        buf = lines.pop() || "";
+        for (const line of lines) {
+          const m = line.match(/time=(\d{2}):(\d{2}):(\d{2})\.\d+/);
+          if (m) onProgress(m[1] + ":" + m[2] + ":" + m[3]);
+        }
+      });
+    }
     proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}`))));
     proc.on("error", (err) => reject(new Error(`ffmpeg not found: ${err.message}`)));
   });
@@ -27,23 +44,14 @@ function escapeConcatPath(p) {
 
 async function createGapVideo(outPath) {
   await runFfmpeg([
-    "-y",
-    "-f",
-    "lavfi",
-    "-i",
-    `color=c=black:s=${WIDTH}x${HEIGHT}:d=${GAP_DURATION_SEC}`,
-    "-f",
-    "lavfi",
-    "-i",
-    "anullsrc=r=44100:cl=stereo",
-    "-t",
-    String(GAP_DURATION_SEC),
-    "-c:v",
-    "libx264",
-    "-pix_fmt",
-    "yuv420p",
-    "-c:a",
-    "aac",
+    "-y", "-threads", "2",
+    "-f", "lavfi", "-i", `color=c=black:s=${WIDTH}x${HEIGHT}:d=${GAP_DURATION_SEC}`,
+    "-f", "lavfi", "-i", `anullsrc=r=${AUDIO_RATE}:cl=stereo`,
+    "-t", String(GAP_DURATION_SEC),
+    "-r", String(FPS),
+    "-c:v", "libx264", "-pix_fmt", "yuvj420p",
+    "-video_track_timescale", "90000",
+    "-c:a", "aac", "-ar", String(AUDIO_RATE),
     "-shortest",
     outPath,
   ]);
@@ -52,21 +60,14 @@ async function createGapVideo(outPath) {
 async function createBismiVideo(outPath, bismiPath) {
   const duration = await getAudioDurationInSeconds(bismiPath);
   await runFfmpeg([
-    "-y",
-    "-f",
-    "lavfi",
-    "-i",
-    `color=c=black:s=${WIDTH}x${HEIGHT}`,
-    "-i",
-    bismiPath,
-    "-t",
-    String(duration),
-    "-c:v",
-    "libx264",
-    "-pix_fmt",
-    "yuv420p",
-    "-c:a",
-    "aac",
+    "-y", "-threads", "2",
+    "-f", "lavfi", "-i", `color=c=black:s=${WIDTH}x${HEIGHT}`,
+    "-i", bismiPath,
+    "-t", String(duration),
+    "-r", String(FPS),
+    "-c:v", "libx264", "-pix_fmt", "yuvj420p",
+    "-video_track_timescale", "90000",
+    "-c:a", "aac", "-ar", String(AUDIO_RATE),
     "-shortest",
     outPath,
   ]);
@@ -120,7 +121,7 @@ async function main() {
       const [chapter] = s.verseKey.split(":");
       if (current.chapter !== chapter) {
         if (current.verses.length) surahs.push(current);
-        current = { chapter: Number(chapter), verses: [] };
+        current = { chapter, verses: [] };
       }
       current.verses.push(s);
     }
@@ -154,8 +155,25 @@ async function main() {
       .join("\n");
     await fs.writeFile(listPath, listContent, "utf8");
 
-    console.log(`Concatenating ${segments.length} ayahs + bismi + gaps → ${outFile} (lossless)...`);
-    await runFfmpeg(["-y", "-f", "concat", "-safe", "0", "-i", listPath, "-c", "copy", outFile]);
+    const totalClips = fileEntries.length;
+    let lastProgress = "";
+    console.log(`Concatenating ${totalClips} clips → ${outFile} (lossless, low memory)...`);
+    await runFfmpeg([
+      "-y", "-threads", "1",
+      "-f", "concat", "-safe", "0", "-i", listPath,
+      "-c", "copy",
+      "-avoid_negative_ts", "make_zero",
+      "-stats_period", "2",
+      outFile,
+    ], {
+      onProgress: (timeStr) => {
+        if (timeStr !== lastProgress) {
+          lastProgress = timeStr;
+          process.stdout.write(`\r  Progress: ${timeStr}   `);
+        }
+      },
+    });
+    process.stdout.write("\n");
     await fs.unlink(listPath).catch(() => {});
   } finally {
     await cleanup();
