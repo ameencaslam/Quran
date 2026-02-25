@@ -3,24 +3,22 @@ import { Composition } from 'remotion';
 import { AyahJuz } from './AyahJuz';
 import { FPS, WIDTH, HEIGHT } from '../src/config.mjs';
 import './fonts.css';
-// Default timeline (Juz 1) so the composition has shape; renderer will override props.
-// Ensure you build timelines first.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const juz1 = require('../timelines/juz_1.json');
+
+const defaultProps = {
+  segments: [] as any[],
+  backgroundRelPath: '/backgrounds/1.png' as string,
+};
 
 export const RemotionRoot: React.FC = () => (
   <>
     <Composition
       id="JuzVideo"
       component={AyahJuz}
-      durationInFrames={Math.round(juz1.totalDurationSec * FPS)}
+      durationInFrames={60}
       fps={FPS}
       width={WIDTH}
       height={HEIGHT}
-      defaultProps={{
-        segments: juz1.segments,
-        backgroundRelPath: '/backgrounds/1.png',
-      }}
+      defaultProps={defaultProps}
     />
   </>
 );
