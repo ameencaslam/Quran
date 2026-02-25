@@ -7,7 +7,6 @@ import {
   staticFile,
   useCurrentFrame,
   useVideoConfig,
-  interpolate,
 } from "remotion";
 
 type Translation = {
@@ -78,16 +77,16 @@ const fontSizeByChars = (
 };
 
 const ARABIC_FONT_TIERS = [
-  { max: 40, size: 80 },
-  { max: 80, size: 70 },
-  { max: 120, size: 60 },
-  { max: 200, size: 50 },
+  { max: 40, size: 48 },
+  { max: 80, size: 46 },
+  { max: 120, size: 42 },
+  { max: 200, size: 40 },
 ];
 const TRANS_FONT_TIERS = [
-  { max: 60, size: 36 },
-  { max: 120, size: 30 },
-  { max: 180, size: 24 },
-  { max: 280, size: 20 },
+  { max: 60, size: 28 },
+  { max: 120, size: 22 },
+  { max: 180, size: 18 },
+  { max: 280, size: 16 },
 ];
 
 const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
@@ -102,14 +101,6 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
     segments[segments.length - 1];
 
   if (!seg) return null;
-
-  const rel = t - seg.startSec;
-  const fade = interpolate(
-    rel,
-    [0, 0.4, seg.durationSec - 0.4, seg.durationSec],
-    [0, 1, 1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
 
   const stripFootnoteTags = (s: string) =>
     s
@@ -133,10 +124,10 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
   const mlText = getByResource(37) || "[Malayalam missing]";
   const hiText = getByResource(122) || "[Hindi missing]";
 
-  const arabicFont = fontSizeByChars(arabicLen, ARABIC_FONT_TIERS, 24);
-  const enFont = fontSizeByChars(enText.length, TRANS_FONT_TIERS, 16);
-  const mlFont = fontSizeByChars(mlText.length, TRANS_FONT_TIERS, 16);
-  const hiFont = fontSizeByChars(hiText.length, TRANS_FONT_TIERS, 16);
+  const arabicFont = fontSizeByChars(arabicLen, ARABIC_FONT_TIERS, 14);
+  const enFont = fontSizeByChars(enText.length, TRANS_FONT_TIERS, 10);
+  const mlFont = fontSizeByChars(mlText.length, TRANS_FONT_TIERS, 10);
+  const hiFont = fontSizeByChars(hiText.length, TRANS_FONT_TIERS, 10);
 
   const usableHeight = height - 160;
   const arabicHeight = usableHeight * (1 / 3);
@@ -145,7 +136,6 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
   return (
     <AbsoluteFill
       style={{
-        opacity: fade,
         padding: 80,
         textAlign: "center",
         fontFamily: "sans-serif",
