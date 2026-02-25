@@ -85,8 +85,17 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({ segments })
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
   );
 
-  const getByResource = (resourceId: number) =>
-    seg.translations.find((tr) => tr.resourceId === resourceId)?.text || '';
+  const stripFootnoteTags = (s: string) =>
+    s
+      .replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const getByResource = (resourceId: number) => {
+    const t = seg.translations.find((tr) => tr.resourceId === resourceId)?.text || "";
+    return stripFootnoteTags(t);
+  };
 
   const toArabicIndic = (n: number) =>
     String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
