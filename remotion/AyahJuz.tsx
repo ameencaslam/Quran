@@ -77,16 +77,30 @@ const fontSizeByChars = (
 };
 
 const ARABIC_FONT_TIERS = [
-  { max: 40, size: 48 },
-  { max: 80, size: 46 },
+  { max: 30, size: 48 },
+  { max: 60, size: 46 },
+  { max: 90, size: 44 },
   { max: 120, size: 42 },
-  { max: 200, size: 40 },
+  { max: 160, size: 40 },
+  { max: 200, size: 38 },
+  { max: 250, size: 36 },
+  { max: 320, size: 34 },
+  { max: 400, size: 32 },
+  { max: 500, size: 30 },
+  { max: 650, size: 28 },
 ];
 const TRANS_FONT_TIERS = [
-  { max: 60, size: 28 },
-  { max: 120, size: 22 },
-  { max: 180, size: 18 },
-  { max: 280, size: 16 },
+  { max: 50, size: 28 },
+  { max: 100, size: 26 },
+  { max: 150, size: 24 },
+  { max: 200, size: 22 },
+  { max: 250, size: 20 },
+  { max: 300, size: 19 },
+  { max: 360, size: 18 },
+  { max: 440, size: 17 },
+  { max: 540, size: 16 },
+  { max: 660, size: 15 },
+  { max: 800, size: 14 },
 ];
 
 const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
@@ -124,10 +138,10 @@ const CurrentAyahOverlay: React.FC<{ segments: AyahSegment[] }> = ({
   const mlText = getByResource(37) || "[Malayalam missing]";
   const hiText = getByResource(122) || "[Hindi missing]";
 
-  const arabicFont = fontSizeByChars(arabicLen, ARABIC_FONT_TIERS, 14);
-  const enFont = fontSizeByChars(enText.length, TRANS_FONT_TIERS, 10);
-  const mlFont = fontSizeByChars(mlText.length, TRANS_FONT_TIERS, 10);
-  const hiFont = fontSizeByChars(hiText.length, TRANS_FONT_TIERS, 10);
+  const arabicFont = fontSizeByChars(arabicLen, ARABIC_FONT_TIERS, 22);
+  const enFont = fontSizeByChars(enText.length, TRANS_FONT_TIERS, 14);
+  const mlFont = fontSizeByChars(mlText.length, TRANS_FONT_TIERS, 14);
+  const hiFont = fontSizeByChars(hiText.length, TRANS_FONT_TIERS, 14);
 
   const usableHeight = height - 160;
   const arabicHeight = usableHeight * (1 / 3);
