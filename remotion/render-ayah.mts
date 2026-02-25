@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import { bundle } from "@remotion/bundler";
 import { getCompositions, renderMedia } from "@remotion/renderer";
 import { FPS } from "../src/config.mjs";
+import { writeProgressBar } from "./progress-bar.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,8 +71,6 @@ async function renderAyah(juzNumber: number, verseKey: string) {
   );
 
   const startTime = Date.now();
-  let lastPct = -1;
-  let lastTime = Date.now();
   let lastStage: string | null = null;
   type ProgressSnapshot = {
     renderedDoneIn: number | null;
@@ -97,23 +96,13 @@ async function renderAyah(juzNumber: number, verseKey: string) {
     onProgress: (p) => {
       lastProgress = p as ProgressSnapshot;
       if (p.stitchStage !== lastStage) {
-        console.log(`[Phase] ${p.stitchStage}`);
+        process.stdout.write("\n");
         lastStage = p.stitchStage;
       }
-      const pct = Math.round(p.progress * 100);
-      if (pct !== lastPct) {
-        const now = Date.now();
-        if (lastPct >= 0) {
-          const deltaSec = ((now - lastTime) / 1000).toFixed(1);
-          console.log(`Progress: ${pct}% (+${deltaSec}s since ${lastPct}%)`);
-        } else {
-          console.log(`Progress: ${pct}%`);
-        }
-        lastPct = pct;
-        lastTime = now;
-      }
+      writeProgressBar(p.progress, p.stitchStage);
     },
   });
+  process.stdout.write("\n");
 
   const totalMs = Date.now() - startTime;
   console.log(`Rendered ${outPath}`);
